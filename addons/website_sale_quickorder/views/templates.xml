@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+      <data>
+
+        <template id="website_sale_quickorder.quickorder_script" name="quickorder assets" inherit_id="web.assets_common" >
+          <xpath expr="//script[last()]" position="after">
+            <link rel="stylesheet" type="text/css" href="/website_sale_quickorder/static/src/css/style.css" />
+            <script type="text/javascript" src="/website_sale_quickorder/static/src/js/quickorder.js"></script>
+            </xpath>
+        </template>
+        <template id="website_sale_quickorder.header" name="Website Sale QuickOrder"  inherit_id="portal.frontend_layout">
+          <!-- <xpath expr="." position="inside">
+		        <link rel="stylesheet" type="text/css" href="/website_sale_quickorder/static/src/css/style.css" />
+            <script type="text/javascript" src="/website_sale_quickorder/static/src/js/quickorder.js"></script>
+          </xpath> -->
+          <xpath expr="//div[@id='top_menu_collapse']//ul//li[1]" position="before">
+            <li class="nav-item">
+              <a role="menuitem" href="/my/quick-order" class="nav-link ">
+                  <span>Quick order</span>
+              </a>
+            </li>
+          </xpath>
+        </template>
+
+        <template id="website_sale_quickorder.portal_my_home_menu_sale" name="Portal layout : sales menu entries" inherit_id="portal.portal_breadcrumbs" priority="20">
+            <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+                <li t-if="page == 'quickorder'" t-attf-class="breadcrumb-item #{'active ' if not sale_order else ''}">
+                    <t>Quick Order</t>
+                </li>
+            </xpath>
+        </template>
+
+        <template id="website_sale_quickorder.search" name="Quick Order Search" inherit_id="website_sale.website_sale_products_search_box" primary="True">
+          <xpath expr="//input[@name='search']" position="attributes">
+            <attribute name="class">quick-search form-control oe_search_box </attribute>
+          </xpath>
+        </template>
+
+        <template id="website_sale_quickorder.index" name="Quick order">
+          <t t-call="website_sale_quickorder.header">
+            <t t-set="additional_title">Quick Order</t>
+              <t t-call="website_sale_quickorder.quickorder_script"> </t>
+            <div class="container">
+              <div class="my-4">
+                <t t-call="website_sale_quickorder.portal_my_home_menu_sale" />
+              </div>
+              <div class="my-4">
+                <h4> Quick order form</h4>
+              </div>
+              <t t-call="website_sale_quickorder.search" />
+
+              <div class="row my-3 bg-light">
+                <div class="col-lg-8 sm-6 md-6">
+                  <div class="p-3">
+                    <div class="table-responsive">
+                      <table class="table table-hover top-middle" id="quick-order-table">
+                        <thead>
+                          <td>
+                            Item #
+                          </td>
+                          <td>
+                            Qty
+                          </td>
+                          <td>
+                            Unit
+                          </td>
+                          <td>
+                            Price
+                          </td>
+                          <td>
+                          </td>
+                        </thead>
+                        <tbody>
+                          <tr class="first-tr">
+                            <td colspan="5">
+                              <h3 class="my-3 text-center">
+                                No products available
+                              </h3>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="d-flex justify-content-end mt-4 all-btns">
+                      <button class="btn btn-warning float-right"> <i class="fa fa-tag mr-2" ></i>Get Quote </button>
+                      <button class="btn btn-secondary float-right mx-3">  <i class="fa fa-clipboard mr-2" /> Create Order </button>
+                      <button class="btn btn-primary float-right add-to-cart"> <i class="fa fa-shopping-cart mr-2"></i> Add to Cart </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 sm-6 md-6 py-3 ">
+                  <h5 class="my-2 py-2"> <i class="fa fa-link mr-3" ></i>  Upload Your Order </h5>
+                  <div class="pa-4 text-center p-3 bg-lgrey">
+                    <p class="text-center"> Drag and drop CSV, .XLS or .ODF file here, <br />
+                       or select them from your computer.</p>
+                       <p class="text-center"> Get Directions </p>
+                       <div class="file-upload btn btn-secondary">
+            							Upload
+            							<input type="file" name="file"/>
+            						</div>
+                  </div>
+                  <h5 class="my-2 py-2"> <i class="fa fa-clipboard mr-3"></i>  Paste Your Order </h5>
+                  <div class="pa-4 p-3">
+                    <p> Copy and paste your order  with the item #. quantity ( and optionally units ), separated by spaces, semicolons or commas.</p>
+                    <textarea rows="5" class="p-3 w-100" placeholder="Copy and paste your order" />
+                    <button class="btn btn-primary float-right mt-3"> Verify Order </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </t>
+
+        </template>
+      </data>
+</odoo>

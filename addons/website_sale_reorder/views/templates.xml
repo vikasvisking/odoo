@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+      <template id="reorder" inherit_id="sale.portal_my_orders">
+        <xpath expr="//thead//tr//th[4]" position="after">
+          <th class="text-right"> Reorder</th>
+        </xpath>
+        <xpath expr="//td[4]" position="after">
+          <td class="text-right">
+            <a t-att-href="('/my/reorder/%s' % order.id)">
+              <i class="fa fa-cart-plus mr-1" role="img" aria-label="Re-order" title="Re-Order" />Re-Order
+            </a>
+          </td>
+        </xpath>
+      </template>
+</odoo>
