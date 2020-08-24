@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_luckins_luckins,luckins.luckins,model_luckins_luckins,base.group_user,1,1,1,1
+access_luckins_major_category,luckins.major_category,model_luckins_major_category,base.group_user,1,1,1,1
+access_luckins_minor_category,luckins.minor_category,model_luckins_minor_category,base.group_user,1,1,1,1
+access_luckins_brands,access_luckins_brands,model_luckins_brands,base.group_user,1,1,1,1
+access_luckins_brands,access_luckins_brands,model_luckins_brands,base.group_user,1,1,1,1
+access_luckins_brand_major_category,access_luckins_brand_major_category,model_luckins_brand_major_category,base.group_user,1,1,1,1
+access_luckins_brand_minor_category,access_luckins_brand_minor_category,model_luckins_brand_minor_category,base.group_user,1,1,1,1
+access_luckins_productcount,access_luckins_productcount,model_luckins_productcount,base.group_user,1,1,1,1
+access_luckins_product,access_luckins_product,model_luckins_product,base.group_user,1,1,1,1

@@ -1,0 +1,159 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+
+    <record model="ir.ui.view" id="luckins.list">
+      <field name="name">General Category Window</field>
+      <field name="model">luckins.luckins</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="luckins_id"/>
+          <field name="created_date"/>
+        </tree>
+      </field>
+    </record>
+
+
+    <!-- actions opening views on models -->
+    <record model="ir.actions.act_window" id="luckins.action_window">
+      <field name="name">luckins window</field>
+      <field name="res_model">luckins.luckins</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="luckins.action_window2">
+      <field name="name">Major Category Window</field>
+      <field name="res_model">luckins.major_category</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="luckins.action_window3">
+      <field name="name">Minor Category Window</field>
+      <field name="res_model">luckins.minor_category</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="luckins.action_window4">
+      <field name="name">Brands</field>
+      <field name="res_model">luckins.brands</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="luckins.action_window5">
+      <field name="name">Product Count</field>
+      <field name="res_model">luckins.productcount</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="luckins.action_window6">
+      <field name="name">Brand Major Categories</field>
+      <field name="res_model">luckins.brand_major_category</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="luckins.action_window7">
+      <field name="name">Brand Minor Categories</field>
+      <field name="res_model">luckins.brand_minor_category</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+</data>
+
+    <!-- server action to the one above -->
+<data>
+    <!-- major category -->
+    <record model="ir.actions.server" id="luckins.get_general">
+      <field name="name">General Categories</field>
+      <field name="type">ir.actions.server</field>
+      <field name="model_id" ref="model_luckins_luckins"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = model.getLuckinsGeneralCategory()
+      </field>
+    </record>
+
+    <record model="ir.actions.server" id="luckins.get_major">
+      <field name="name">Major Categories</field>
+      <field name="type">ir.actions.server</field>
+      <field name="model_id" ref="model_luckins_major_category"/>
+      <field name="state">code</field>
+      <field name="code">
+          action = model.getLuckinsMajorCategory()
+      </field>
+    </record>
+
+    <record model="ir.actions.server" id="luckins.get_minor">
+      <field name="name">Minor Categories</field>
+      <field name="type">ir.actions.server</field>
+      <field name="model_id" ref="model_luckins_minor_category"/>
+      <field name="state">code</field>
+      <field name="code">
+          action = model.getLuckinMinorCategory()
+      </field>
+    </record>
+
+    <!-- Brands -->
+    <record model="ir.actions.server" id="luckins.get_brand_major">
+      <field name="name">Brand Major Categories</field>
+      <field name="type">ir.actions.server</field>
+      <field name="model_id" ref="model_luckins_brand_major_category"/>
+      <field name="state">code</field>
+      <field name="code">
+          action = model.getBrandMajorCategory()
+      </field>
+    </record>
+
+    <record model="ir.actions.server" id="luckins.get_brand_minor">
+      <field name="name">Brand Minor Categories</field>
+      <field name="type">ir.actions.server</field>
+      <field name="model_id" ref="model_luckins_brand_minor_category"/>
+      <field name="state">code</field>
+      <field name="code">
+          action = model.getBrandMinorCategory()
+      </field>
+    </record>
+
+    <record model="ir.actions.server" id="luckins.get_products">
+      <field name="name">Products</field>
+      <field name="type">ir.actions.server</field>
+      <field name="model_id" ref="model_luckins_product"/>
+      <field name="state">code</field>
+      <field name="code">
+          action = model.getLuckinsProducts()
+      </field>
+    </record>
+
+    <!-- Top menu item -->
+    <menuitem name="Luckins" id="luckins.menu_root"/>
+
+    <!-- menu categories -->
+    <menuitem name="Categories" id="luckins.menu_1" parent="luckins.menu_root"/>
+    <menuitem name="Brands" id="luckins.menu_2" parent="luckins.menu_root"/>
+    <menuitem name="Products" id="luckins.menu_3" parent="luckins.menu_root" />
+
+    <!-- actions -->
+    <!-- Menu 1 -->
+    <menuitem name="General Category" id="luckins.menu_2_list" parent="luckins.menu_1" action="luckins.action_window" sequence="200"/>
+    <menuitem name="Major Category" id="luckins.menu_1_list" parent="luckins.menu_1" action="luckins.action_window2" sequence="300"/>
+    <menuitem name="Minor Category" id="luckins.menu_3_list" parent="luckins.menu_1" action="luckins.action_window3" sequence="400"/>
+    <menuitem name="Update General Categories" id="luckins" parent="luckins.menu_1" action="luckins.get_general" sequence="500" />
+    <menuitem name="Update Major Categories" id="luckins_maj" parent="luckins.menu_1" action="luckins.get_major" sequence="600" />
+    <menuitem name="Update Minor Categories" id="luckins_min" parent="luckins.menu_1" action="luckins.get_minor" sequence="700" />
+
+    <!-- Menu 2 -->
+    <menuitem name="Brands" id="luckins.menu_4_list" parent="luckins.menu_2" action="luckins.action_window4" sequence="100"/>
+    <menuitem name="Brand Major Categories" id="luckins_brand_maj_cat" parent="luckins.menu_2" action="luckins.action_window6" sequence="200" />
+    <menuitem name="Brand Minor Categories" id="luckins_brand_minor_cat" parent="luckins.menu_2" action="luckins.action_window7" sequence="300" />
+    <menuitem name="Update Brand Major Categories" id="luckins_brand_maj" parent="luckins.menu_2" action="luckins.get_brand_major" sequence="400" />
+    <menuitem name="Update Brand Minor Categories" id="luckins_brand_min" parent="luckins.menu_2" action="luckins.get_brand_minor" sequence="500" />
+
+    <!-- Products -->
+    <menuitem name="View All Products" id="luckins_product" parent="luckins.menu_3" action="luckins.action_window5" sequence="300" />
+    <menuitem name="Update All Products" id="luckins_product_update" parent="luckins.menu_3" action="luckins.get_products" sequence="300" />
+
+
+    <!-- <menuitem name="Product Count" id="luckins.menu_5_list" parent="luckins.menu_2" action="luckins.action_window5" sequence="600"/> -->
+
+  </data>
+</odoo>
