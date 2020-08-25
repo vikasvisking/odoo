@@ -300,9 +300,11 @@ class ProductAAttributeValue(models.Model):
     value= fields.Char('Attribute Value')
 
 def getImageFromURL(url):
-    r = requests.get(url, allow_redirects=True)
-    image = base64.b64encode(r.content)
-    ImageSend = image.decode('ascii')
+    ImageSend = None
+    if url:
+        r = requests.get(url, allow_redirects=True)
+        image = base64.b64encode(r.content)
+        ImageSend = image.decode('ascii')
     return ImageSend
 
 class LuckinsProducts(models.Model):
