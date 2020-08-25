@@ -538,14 +538,10 @@ class LuckinsProducts(models.Model):
                                     if images["Tag"] == "large_image":
                                         other_images_urls.append(images["URL"])
                         elif images_list["AdditionalInfo"] == "URL":
-                            print('================================== Certifications')
                             certifications = images_list["AdditionalInfo"]
                         elif images_list["AdditionalInfo"] == "Technical Data Sheet":
-                            print('================================== technical_data_sheet')
-
                             technical_data_sheet = images_list["URL"]
                         elif images_list["AdditionalInfo"] == "User Manual":
-                            print('================================== User Manual')
                             user_manual = images_list["URL"]
                         else:
                             continue
