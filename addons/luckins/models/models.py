@@ -457,7 +457,7 @@ class LuckinsProducts(models.Model):
                                 self.env['luckins.productvalue'].create({
                                   'product_id': products_obj,
                                   'name': value['Description'],
-                                  'value': attribute_valu_dict['value'],
+                                  'value': attribute_valu_dict.get('value'),
                                   'attribute': attribute.id
                                 })
                     self.env.cr.commit()
@@ -527,24 +527,24 @@ class LuckinsProducts(models.Model):
                     thumbnail = getImageFromURL(product_item.get('ThumbnailURL'))
                     other_images_urls = []
                     for images_list in product_item.get('Asset2List'):
-                        if images_list["Tag"] == "VIEWPORT_DESKTOP":
+                        if images_list.get('Tag') == "VIEWPORT_DESKTOP":
                             for images in images_list.get('Asset2CustomSizeList'):
                                 if count == 1:
                                     if images.get('Tag') == "small_thumbnails":
-                                        small_thumbnail = getImageFromURL(images["URL"])
-                                    elif images["Tag"] == "large_thumbnails":
-                                        large_thumbnail = getImageFromURL(images["URL"])
+                                        small_thumbnail = getImageFromURL(images.get('URL'))
+                                    elif images.get('Tag') == "large_thumbnails":
+                                        large_thumbnail = getImageFromURL(images.get('URL'))
                                     else:
-                                        big_image = getImageFromURL(images["URL"])
+                                        big_image = getImageFromURL(images.get('URL'))
                                 else:
-                                    if images["Tag"] == "large_image":
-                                        other_images_urls.append(images["URL"])
-                        elif images_list["AdditionalInfo"] == "URL":
+                                    if images.get('Tag') == "large_image":
+                                        other_images_urls.append(images.get('URL'))
+                        elif images_list.get('AdditionalInfo') == "URL":
                             certifications = images_list["AdditionalInfo"]
-                        elif images_list["AdditionalInfo"] == "Technical Data Sheet":
-                            technical_data_sheet = images_list["URL"]
-                        elif images_list["AdditionalInfo"] == "User Manual":
-                            user_manual = images_list["URL"]
+                        elif images_list.get('AdditionalInfo') == "Technical Data Sheet":
+                            technical_data_sheet = images_list.get('URL')
+                        elif images_list.get('AdditionalInfo') == "User Manual":
+                            user_manual = images_list.get('URL')
                         else:
                             continue
                         count += 1
@@ -593,8 +593,8 @@ class LuckinsProducts(models.Model):
                                 attribute_valu_dict = next((d for d in product_item.get('AttributeList') if d.get('AttributeLabelID') == attribute_label.get('ID')), None)
                                 self.env['luckins.productvalue'].create({
                                   'product_id': products_obj.id,
-                                  'name': attribute_label['Description'],
-                                  'value': attribute_valu_dict['value'],
+                                  'name': attribute_label.get('Description'),
+                                  'value': attribute_valu_dict.get('value'),
                                   'attribute': attribute_class_obj.id
                                 })
                     self.env.cr.commit()
