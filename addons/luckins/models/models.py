@@ -3,6 +3,7 @@
 from odoo import models, fields, api
 import logging
 import requests
+import base64
 import json
 from time import sleep
 
@@ -236,6 +237,7 @@ class BrandMinorCategory(models.Model):
     luckins_id = fields.Char('Luckin Id')
     name = fields.Char('Category Name')
     item_count = fields.Integer('Item Count')
+    flag_bit = fields.Boolean(default = False,string = 'Flag Bit')
     created_date = fields.Datetime('Created Date', default=lambda self: fields.datetime.now())
 
     def getBrandMinorCategory(self):
@@ -267,6 +269,7 @@ class BrandMinorCategory(models.Model):
                     })
             if len(minor_list) > 0:
                 self.env["luckins.brand_minor_category"].create(minor_list)
+                self.env.cr.commit()
                 _logger.info('Brand Minor Category Created')
         _logger.info('Brand Minor Category Successfully Updated')
 
@@ -279,6 +282,28 @@ class ProductCount(models.Model):
     brand = fields.Many2one('luckins.brands')
     item_count = fields.Integer('Item Count')
 
+class ProductAtrributes(models.Model):
+
+    _name = 'luckins.productatrribute'
+    _description = 'luckins.productatrribute'
+
+    product = fields.Many2one('luckins.product')
+    name= fields.Char('Attribute Name')
+
+class ProductAAttributeValue(models.Model):
+    _name = 'luckins.productvalue'
+    _description = 'luckins.productvalue'
+
+    product = fields.Many2one('luckins.product')
+    attribute = fields.Many2one('luckins.productatrribute')
+    name= fields.Char('Attribute Name')
+    value= fields.Char('Attribute Value')
+
+def getImageFromURL(url):
+    r = requests.get(url, allow_redirects=True)
+    image = base64.b64encode(r.content)
+    ImageSend = image.decode('ascii')
+    return ImageSend
 
 class LuckinsProducts(models.Model):
 
@@ -286,8 +311,28 @@ class LuckinsProducts(models.Model):
     _desctiption = 'luckins.product'
 
     name = fields.Char('Product Name')
-    catelog_num = fields.Char('Product Catelog Number')
-
+    catelog_no = fields.Char('Product Catelog Number')
+    category = fields.Many2one('luckins.minor_category', string="Category")
+    minor_cat = fields.Many2one('luckins.brand_minor_category', string="Brand Minor Category")
+    product_type = fields.Char('Product Type')
+    dimensions = fields.Char('Dimensions')
+    finish = fields.Char('finish')
+    short_desc = fields.Char('Short Description')
+    short_key = fields.Char('Sort Key')
+    other_desc = fields.Char('Other Description')
+    luckin_live_description = fields.Text('Luckin Live Description')
+    product_id = fields.Char('Luckin Product ID')
+    price = fields.Float('Product Price')
+    base_price = fields.Float('Product Base Price')
+    discount = fields.Float('Product Discount')
+    thumbnail = fields.Image('Thumbnail Image')
+    small_thumbnail = fields.Image('Small Thumbnail')
+    large_thumbnail = fields.Image('Large Thumbnail')
+    big_image = fields.Image('Image')
+    user_manual = fields.Char('User Manual')
+    certifications = fields.Char('Certifications')
+    technical_data_sheet = fields.Char('Technical Data Sheet')
+    installation_time = fields.Char('Installation Time')
 
     def getLuckinsProducts(self):
         headers = {
@@ -308,6 +353,250 @@ class LuckinsProducts(models.Model):
     		}
             product_data_request = requests.post(url, data = json.dumps(obj), headers = headers)
             luckins_product_list = product_data_request.json()
-            print('==============Start===========')
-            print(luckins_product_list)
-            print('==============End===========')
+            for product in luckins_product_list.get('PickListItemDetailsList'):
+                catalogue_no = product.get('CatalogueNumber')
+                vareint = False
+                vareint_exists = self.env['luckins.product'].search([('catelog_no', '=', catalogue_no), ('product_id', '!=', product.get('TSIItemCode'))])
+                if vareint_exists:
+                    vareint = True
+
+                access_token = get_luckins_access_token()
+                if product.get('CatalogueNumber'):
+                    product_req_data = {
+                        "Token":access_token,
+      					"ViewportType":3,
+      					"AssetSized2List":[{"Height":100,"Width":100,"MaintainAspectRatio":1,"Tag":"small_thumbnails"},{"Height":400,"Width":400,"MaintainAspectRatio":1,"Tag":"large_thumbnails"},{"Height":800,"Width":800,"MaintainAspectRatio":1,"Tag":"large_image"}],
+      					"TSIUniqueIdentifierPairList":[{"TSIUniqueIdentifierType":1,"TSIUniqueIdentifier":product.get('TSIItemCode')}]
+                        }
+                    product_request = requests.post(single_product_url, data = json.dumps(product_req_data), headers=headers)
+                    product_data = product_request.json()
+                    product_item = product_data.get('ItemDetailsList')[0]
+                    product_id = product_item.get('TSIItemCode')
+                    name = product_item.get('Product')
+                    short_desc = product_item.get('ShortDescription')
+                    small_thumbnail = ''
+                    large_thumbnail = ''
+                    big_image = ''
+                    certifications = None
+                    technical_data_sheet = None
+                    user_manual = None
+                    thumbnail = getImageFromURL(product_item.get('ThumbnailURL'))
+                    for image_list in product_item.get('Asset2List'):
+                        if image_list.get('Tag') == 'VIEWPORT_DESKTOP':
+                            for image in image_list.get('Asset2CustomSizeList'):
+                                if image.get('Tag') == 'small_thumbnails':
+                                    small_thumbnail = image.get('URL')
+                                    small_thumbnail = getImageFromURL(small_thumbnail)
+                                elif image.get('Tag') == 'large_thumbnails':
+                                    large_thumbnail = image.get('URL')
+                                    large_thumbnail = getImageFromURL(large_thumbnail)
+                                else:
+                                    big_image = image.get('URL')
+                                    big_image = getImageFromURL(big_image)
+                        elif image_list.get('AdditionalInfo') == "URL":
+                            certifications = image_list.get('URL')
+                        elif image_list.get('AdditionalInfo') == "Technical Data Sheet":
+                            technical_data_sheet = image_list.get('URL')
+                        elif image_list.get('AdditionalInfo') == "User Manual":
+                            user_manual = image_list.get('URL')
+                        else:
+                            continue
+
+                    try:
+                        minor_cat = self.env['luckins.brand_minor_category'].search([('luckins_id', '=', product_item.get('ProductRangeCodeMinor'))])
+                    except Exception as e:
+                        minor_cat = None
+
+                    product_ = {}
+                    product_['name'] = name
+                    product_['dimensions'] = product_item.get('Dimensions')
+                    product_['finish'] = product_item.get('Finish')
+                    product_['short_desc'] = short_desc
+                    product_['other_desc'] = product_item.get('OtherDesc')
+                    product_['price'] = product_item.get('CalculatedDiscountedPrice')
+                    product_['base_price'] = product_item.get('BasePrice')
+                    product_['discount'] = product_item.get('Discount')
+                    product_['product_type'] = product_item.get('ProductType')
+                    product_['luckin_live_description'] = product_item.get('LUCKINSliveDescription')
+                    product_['catelog_no'] = catalogue_no
+                    product_['installation_time'] = product_item.get('InstallationTime')
+                    product_['short_key'] = product_item.get('Sortkey')
+                    product_['product_id'] =  product_id
+                    product_['big_image'] =  big_image
+                    product_['small_thumbnail'] =  small_thumbnail
+                    product_['large_thumbnail'] =  large_thumbnail
+                    product_['category'] =  cat.minor_category.id
+                    product_['thumbnail'] =  thumbnail
+                    product_['certifications'] =  certifications
+                    product_['technical_data_sheet'] =  technical_data_sheet
+                    product_['user_manual'] =  user_manual
+
+
+                    if minor_cat:
+                        product_['minor_cat'] = minor_cat.id
+
+                    products_obj = self.env['luckins.product'].search([('product_id', '=', product_id), ('category', '=', cat.minor_category.id)])
+                    if not products_obj:
+                        products_obj = self.env['luckins.product'].create(product_)
+                    else:
+                        products_obj.write(product_)
+                    self.env.cr.commit()
+
+                    if product_data.get('AttributeLabelList'):
+                        self.env['luckins.productatrribute'].search([('product', '=', products_obj.id)]).unlink()
+                        for attrb in product_data.get('AttributeLabelList'):
+                            attribute_label_list = filter(lambda label_data: label_data["AttributeClassID"] == attrb["ID"] , product_data["AttributeLabelList"])
+                            attribute = self.env['luckins.productatrribute'].create({
+                              'product': products_obj.id,
+                              'name': attrb.get('Description')
+                            })
+                            for value in attribute_label_list:
+                                attribute_valu_dict = next((d for d in product_data["ItemDetailsList"][0]["AttributeList"] if d["AttributeLabelID"] == value["ID"]), None)
+                                self.env['luckins.productvalue'].create({
+                                  'product_id': product_obj,
+                                  'name': value['Description'],
+                                  'value': attribute_valu_dict['value'],
+                                  'attribute': attribute.id
+                                })
+                    self.env.cr.commit()
+
+    def getMinorProducts(self):
+        url = 'https://xtra.luckinslive.com/LuckinsLiveRESTHTTPS/ItemDetailsPicklist/1'
+        single_product_url = 'https://xtra.luckinslive.com/LuckinsLiveRESTHTTPS/ItemDetail/1'
+        headers = {
+    	    "Content-Type": "application/json",
+    	    "Accept": "application/json",
+    	}
+        new_record_fetch = True
+        is_flag_exist = self.env['luckins.brand_minor_category'].search([('flag_bit', '=', True)])
+        if is_flag_exist:
+            new_record_fetch = False
+        min_cats = self.env['luckins.brand_minor_category'].search([])
+        for min in min_cats:
+            if min.flag_bit:
+                new_record_fetch = True
+            if not new_record_fetch:
+                continue
+            min.write({
+              'flag_bit': True
+            })
+            access_token = get_luckins_access_token()
+            myobj = {
+    			"Token":access_token,
+    			"ViewportType":3,
+    			"AssetSized2List":[],
+    			"PageSize": min.item_count,
+    			"TSIUniqueIdentifierPairList":[{"TSIUniqueIdentifierType":2,"TSIUniqueIdentifier": min.luckins_id},{"TSIUniqueIdentifierType":7,"TSIUniqueIdentifier":min.major.brand.supplier_id}]
+    		}
+            products_request = requests.post(url, data = json.dumps(myobj), headers=headers)
+            products_data = products_request.json()
+            for product in products_data.get('PickListItemDetailsList'):
+                catalogue_no = product.get('CatalogueNumber')
+                is_varient = False
+                varients = self.env['luckins.product'].search([( 'catelog_no', "=", catalogue_no), ('product_id', '!=', product.get('TSIItemCode'))])
+                if varients:
+                    is_varient = True
+
+                if product.get('CatalogueNumber'):
+                    access_token = get_luckins_access_token()
+                    product_req_data =  {
+    					"Token":access_token,
+    					"ViewportType":3,
+    					"AssetSized2List":[{"Height":100,"Width":100,"MaintainAspectRatio":1,"Tag":"small_thumbnails"},{"Height":400,"Width":400,"MaintainAspectRatio":1,"Tag":"large_thumbnails"},{"Height":800,"Width":800,"MaintainAspectRatio":1,"Tag":"large_image"}],
+    					"TSIUniqueIdentifierPairList":[{"TSIUniqueIdentifierType":1,"TSIUniqueIdentifier":product.get('TSIItemCode')}]
+    				}
+                    product_request = requests.post(single_product_url, data = json.dumps(product_req_data), headers=headers)
+                    product_data = product_request.json()
+                    product_item = product_data["ItemDetailsList"][0]
+                    try:
+                        category = self.env['luckins.minor_category'].search([('luckins_id', '=', product_item.get('CommodityCodeMinor'))])
+                    except Exception as e:
+                        category = None
+                    product_id = product_item.get('TSIItemCode')
+                    name = product_item.get('Product')
+                    short_desc = product_item.get('ShortDescription')
+                    small_thumbnail = ''
+                    large_thumbnail = ''
+                    big_image = ''
+                    certifications = None
+                    technical_data_sheet = None
+                    user_manual = None
+                    count = 1
+                    thumbnail = getImageFromURL(product_item.get('ThumbnailURL'))
+                    other_images_urls = []
+                    for images_list in product_item.get('Asset2List'):
+                        if images_list["Tag"] == "VIEWPORT_DESKTOP":
+                            for images in images_list.get('Asset2CustomSizeList'):
+                                if count == 1:
+                                    if images.get('Tag') == "small_thumbnails":
+                                        small_thumbnail = getImageFromURL(images["URL"])
+                                    elif images["Tag"] == "large_thumbnails":
+                                        large_thumbnail = getImageFromURL(images["URL"])
+                                    else:
+                                        big_image = getImageFromURL(images["URL"])
+                                else:
+                                    if images["Tag"] == "large_image":
+                                        other_images_urls.append(images["URL"])
+                        elif images_list["AdditionalInfo"] == "URL":
+                            print('================================== Certifications')
+                            certifications = images_list["AdditionalInfo"]
+                        elif images_list["AdditionalInfo"] == "Technical Data Sheet":
+                            print('================================== technical_data_sheet')
+
+                            technical_data_sheet = images_list["URL"]
+                        elif images_list["AdditionalInfo"] == "User Manual":
+                            print('================================== User Manual')
+                            user_manual = images_list["URL"]
+                        else:
+                            continue
+                        count += 1
+                    tax_id = ""
+                    product_ = {}
+                    product_['name'] = name
+                    product_['dimensions'] = product_item.get('Dimensions')
+                    product_['finish'] = product_item.get('Finish')
+                    product_['short_desc'] = short_desc
+                    product_['other_desc'] = product_item.get('OtherDesc')
+                    product_['price'] = product_item.get('CalculatedDiscountedPrice')
+                    product_['base_price'] = product_item.get('BasePrice')
+                    product_['discount'] = product_item.get('Discount')
+                    product_['product_type'] = product_item.get('ProductType')
+                    product_['luckin_live_description'] = product_item.get('LUCKINSliveDescription')
+                    product_['catelog_no'] = catalogue_no
+                    product_['installation_time'] = product_item.get('InstallationTime')
+                    product_['short_key'] = product_item.get('Sortkey')
+                    product_['product_id'] =  product_id
+                    product_['big_image'] =  big_image
+                    product_['small_thumbnail'] =  small_thumbnail
+                    product_['large_thumbnail'] =  large_thumbnail
+                    if category:
+                        product_['category'] =  category.id
+                    product_['thumbnail'] =  thumbnail
+                    product_['certifications'] =  certifications
+                    product_['technical_data_sheet'] =  technical_data_sheet
+                    product_['user_manual'] =  user_manual
+                    product_['minor_cat'] =  min.id
+#
+                    products_obj = self.env['luckins.product'].search([('product_id', '=', product_id), ('minor_cat', '=', min.id)])
+                    if not products_obj:
+                        products_obj = self.env['luckins.product'].create(product_)
+                    else:
+                        products_obj.write(product_)
+
+                    if product_data.get('AttributeLabelList'):
+                        self.env['luckins.productatrribute'].search([('product', '=', products_obj.id)]).unlink()
+                        for attribute_class in product_data.get('AttributeClassList'):
+                            attribute_label_list = filter(lambda label_data: label_data.get('AttributeClassID') == attribute_class.get('ID') , product_data.get('AttributeLabelList'))
+                            attribute_class_obj = self.env['luckins.productatrribute'].create({
+                                'product': products_obj.id,
+                                'name': attribute_class.get('Description')
+                            })
+                            for attribute_label in attribute_label_list:
+                                attribute_valu_dict = next((d for d in product_item.get('AttributeList') if d.get('AttributeLabelID') == attribute_label.get('ID')), None)
+                                self.env['luckins.productvalue'].create({
+                                  'product_id': product_obj.id,
+                                  'name': attribute_label['Description'],
+                                  'value': attribute_valu_dict['value'],
+                                  'attribute': attribute_class_obj.id
+                                })
+                    self.env.cr.commit()

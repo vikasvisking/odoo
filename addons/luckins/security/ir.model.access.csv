@@ -7,4 +7,6 @@ access_luckins_brands,access_luckins_brands,model_luckins_brands,base.group_user
 access_luckins_brand_major_category,access_luckins_brand_major_category,model_luckins_brand_major_category,base.group_user,1,1,1,1
 access_luckins_brand_minor_category,access_luckins_brand_minor_category,model_luckins_brand_minor_category,base.group_user,1,1,1,1
 access_luckins_productcount,access_luckins_productcount,model_luckins_productcount,base.group_user,1,1,1,1
-access_luckins_product,access_luckins_product,model_luckins_product,base.group_user,1,1,1,1
+access_luckins_product,luckins.product,model_luckins_product,base.group_user,1,1,1,1
+access_luckins_productatrribute,luckins.productatrribute,model_luckins_productatrribute,base.group_user,1,1,1,1
+access_luckins_productvalue,luckins.productvalue,model_luckins_productvalue,base.group_user,1,1,1,1

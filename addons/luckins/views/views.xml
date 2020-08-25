@@ -14,6 +14,20 @@
       </field>
     </record>
 
+    <record id="product_detail" model="ir.ui.view">
+      <field name="name">Product Detail View</field>
+      <field name="model">luckins.product</field>
+      <field name="type">tree</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name" />
+          <field name="product_id" />
+          <field name="catelog_no"/>
+          <field name="finish"/>
+          <field name="price" />
+        </tree>
+      </field>
+    </record>
 
     <!-- actions opening views on models -->
     <record model="ir.actions.act_window" id="luckins.action_window">
@@ -56,6 +70,13 @@
       <field name="name">Brand Minor Categories</field>
       <field name="res_model">luckins.brand_minor_category</field>
       <field name="view_mode">tree,form</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="luckins.action_window8">
+      <field name="name">Products</field>
+      <field name="res_model">luckins.product</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_id" ref="product_detail" />
     </record>
 
 </data>
@@ -124,6 +145,16 @@
       </field>
     </record>
 
+    <record model="ir.actions.server" id="luckins.get_minor_products">
+      <field name="name">Minor Products</field>
+      <field name="type">ir.actions.server</field>
+      <field name="model_id" ref="model_luckins_product"/>
+      <field name="state">code</field>
+      <field name="code">
+          action = model.getMinorProducts()
+      </field>
+    </record>
+
     <!-- Top menu item -->
     <menuitem name="Luckins" id="luckins.menu_root"/>
 
@@ -149,10 +180,9 @@
     <menuitem name="Update Brand Minor Categories" id="luckins_brand_min" parent="luckins.menu_2" action="luckins.get_brand_minor" sequence="500" />
 
     <!-- Products -->
-    <menuitem name="View All Products" id="luckins_product" parent="luckins.menu_3" action="luckins.action_window5" sequence="300" />
-    <menuitem name="Update All Products" id="luckins_product_update" parent="luckins.menu_3" action="luckins.get_products" sequence="300" />
-
-
+    <menuitem name="View All Products" id="luckins_product" parent="luckins.menu_3" action="luckins.action_window8" sequence="300" />
+    <menuitem name="Update All Products" id="luckins_product_update" parent="luckins.menu_3" action="luckins.get_products" sequence="400" />
+    <menuitem name="Update Minor Brand Category Products" id="luckins_product_update2" parent="luckins.menu_3" action="luckins.get_minor_products" sequence="500" />
     <!-- <menuitem name="Product Count" id="luckins.menu_5_list" parent="luckins.menu_2" action="luckins.action_window5" sequence="600"/> -->
 
   </data>
