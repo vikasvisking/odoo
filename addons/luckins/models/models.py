@@ -455,7 +455,7 @@ class LuckinsProducts(models.Model):
                             for value in attribute_label_list:
                                 attribute_valu_dict = next((d for d in product_data["ItemDetailsList"][0]["AttributeList"] if d["AttributeLabelID"] == value["ID"]), None)
                                 self.env['luckins.productvalue'].create({
-                                  'product_id': product_obj,
+                                  'product_id': products_obj,
                                   'name': value['Description'],
                                   'value': attribute_valu_dict['value'],
                                   'attribute': attribute.id
@@ -592,7 +592,7 @@ class LuckinsProducts(models.Model):
                             for attribute_label in attribute_label_list:
                                 attribute_valu_dict = next((d for d in product_item.get('AttributeList') if d.get('AttributeLabelID') == attribute_label.get('ID')), None)
                                 self.env['luckins.productvalue'].create({
-                                  'product_id': product_obj.id,
+                                  'product_id': products_obj.id,
                                   'name': attribute_label['Description'],
                                   'value': attribute_valu_dict['value'],
                                   'attribute': attribute_class_obj.id
