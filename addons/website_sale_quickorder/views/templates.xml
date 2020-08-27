@@ -5,6 +5,7 @@
         <template id="website_sale_quickorder.quickorder_script" name="quickorder assets" inherit_id="web.assets_common" >
           <xpath expr="//script[last()]" position="after">
             <link rel="stylesheet" type="text/css" href="/website_sale_quickorder/static/src/css/style.css" />
+            <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
             <script type="text/javascript" src="/website_sale_quickorder/static/src/js/quickorder.js"></script>
             </xpath>
         </template>
@@ -47,6 +48,20 @@
               <div class="my-4">
                 <h4> Quick order form</h4>
               </div>
+
+              <div class="col-md-12 my-3">
+                <div class="w3-dropdown-hover">
+                   <button class="btn btn-secondary">Copy from Shopping List </button>
+                   <div class="w3-dropdown-content w3-bar-block w3-border">
+                     <t t-foreach="shopping_lists" t-as="i">
+                       <a t-att-href="('/quickorder/shoplist-item?id=%s' % i.id)">
+                         <button class="w3-bar-item w3-button" t-att-data-id="i.id"><t t-esc="i.name"/></button>
+                        </a>
+                     </t>
+                   </div>
+                 </div>
+              </div>
+
               <t t-call="website_sale_quickorder.search" />
 
               <div class="row my-3 bg-light">
@@ -71,6 +86,41 @@
                           </td>
                         </thead>
                         <tbody>
+                          <t t-if="quickorder.quick_order_line" >
+                          <t t-foreach="quickorder.quick_order_line" t-as="line">
+                          <tr t-att-data-id="line.product_id.id" t-att-data-value="line.id">
+                                <td class="d-flex">
+                                  <img t-att-src="('/web/image/product.product/%s/image_128' % line.product_id.id)" class="flex-shrink-0 o_image_64_contain" />
+                                  <span class="ml-2"><t t-esc="line.product_id.name" /></span>
+                                </td>
+                                <td>
+                                <div class="quickorder-qty css_quantity input-group" contenteditable="false">
+                                    <div class="input-group-prepend">
+                                        <a href="javascript:void(0)" class="btn btn-secondary js_add_cart_json decrement" aria-label="Remove one" title="Remove one">
+                                            <i class="fa fa-minus text-light"></i>
+                                        </a>
+                                    </div>
+                                    <input type="number" class="form-control quantity" data-min="1" name="add_qty" t-att-value="line.quantity" />
+                                    <div class="input-group-append">
+                                        <a href="javascript:void(0)" class="btn btn-secondary float_left js_add_cart_json increment" aria-label="Add one" title="Add one">
+                                            <i class="fa fa-plus text-light"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                </td>
+                                <td>
+                                  100
+                                </td>
+                                <td>
+                                  $ <t t-esc="line.product_id.lst_price" />
+                                </td>
+                                <td>
+                                  <button type="button" class="btn btn-danger btn-circle remove"> <i class="fa fa-times" ></i> </button>
+                                </td>
+                            </tr>
+                        </t>
+                        </t>
+                        <t t-else="">
                           <tr class="first-tr">
                             <td colspan="5">
                               <h3 class="my-3 text-center">
@@ -78,14 +128,55 @@
                               </h3>
                             </td>
                           </tr>
+                        </t>
                         </tbody>
                       </table>
                     </div>
                     <div class="d-flex justify-content-end mt-4 all-btns">
                       <button class="btn btn-warning float-right"> <i class="fa fa-tag mr-2" ></i>Get Quote </button>
                       <button class="btn btn-secondary float-right mx-3">  <i class="fa fa-clipboard mr-2" /> Create Order </button>
-                      <button class="btn btn-primary float-right add-to-cart"> <i class="fa fa-shopping-cart mr-2"></i> Add to Cart </button>
+                      <button class="btn btn-primary float-right add-to-cart mx-3"> <i class="fa fa-shopping-cart mr-2"></i> Add to Cart </button>
+                      <div class="w3-dropdown-hover">
+                         <button class="btn btn-secondary"> Add to shopping list </button>
+                         <div class="w3-dropdown-content w3-bar-block w3-border shoplist-btns">
+                           <t t-foreach="shopping_lists" t-as="i">
+                             <button class="w3-bar-item w3-button shoplist-btn" t-att-data-id="i.id"><t t-esc="i.name"/></button>
+                           </t>
+                           <button class="w3-bar-item w3-button" data-toggle="modal" data-target="#exampleModal"> Add new list </button>
+                         </div>
+                       </div>
                     </div>
+
+                    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Add New shopping list</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <i class="fa fa-times"></i>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            <label> List name </label>
+                            <input type="text" name="name" placeholder="Enter the list name" class="form-control" />
+                            <input type="hidden" name="quickorder" t-att-value="quickorder.id" />
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" id="add-shop" class="btn btn-primary">Save changes</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- <div t-if="not table_hreader_render" class="row" style="justify-content: flex-end;margin:0px;">
+                      <div t-if="not shopping_lists" class="mr-2">
+                        <t t-call="website_sale_quickorder.shopping_list_button" />
+                      </div>
+                      <div t-if="shopping_lists">
+                        <h1> Hello </h1>
+                      </div>
+                      <t t-call="website_sale_quickorder.add_to_shopping_list_model" />
+                    </div> -->
                   </div>
                 </div>
                 <div class="col-lg-4 sm-6 md-6 py-3 ">
@@ -109,7 +200,155 @@
               </div>
             </div>
           </t>
-
         </template>
+
+
+        <!-- ====================== New data ============================= -->
+
+        <template id="add_to_shopping_list_model">
+          <div class="modal modal-setName fade">
+            <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+                   <div class="modal-header">
+                      <h4 class="mb-0">Create Shopping List</h4>
+                      <button type="button" class="close close-m" data-dismiss="modal"><span class="fa fa-times" /></button>
+                   </div>
+                  <div class="modal-body">
+                    <label><strong>Shopping List Name</strong></label>
+                    <input type="text" class="form-control" placeholder="enter shopping list name" id="shopping_list_name" autofocus="true"/>
+                    <p class="null_name_shopping_list alert alert-danger mb-0 mt-2" style="display: none;">Please provide a name to the Shopping list</p><br/>
+
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-primary" style="margin-left:14px;" id="submit_shopping_cart">Submit</button>
+                    <button type="button" class="btn btn-secondary close-m" data-dismiss="modal">Cancel</button>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <template id="shopping_list_button">
+            <div class="dropdown dropdown-button" >
+               <a style="text-decoration: none; padding: 0px !important;" href="#" data-toggle="dropdown" class="btn btn-drp dropdown-toggle">
+                 <div class="btn-group">
+                   <button type="button" class="btn btn-gp">Add To Shopping List</button>
+                   <button type="button" class="btn btn-gp"><i class="fa fa-chevron-down"></i></button>
+                 </div>
+               </a>
+               <ul class="dropdown-menu custom-scroll-bar">
+                 <t t-foreach="shopping_list" t-as="user">
+                   <li id="create_new_sp_list" class="create_new_list" t-att-value="user.id"><t t-esc="user.name" /></li>
+                 </t>
+                   <li id="create_new_sp_list" class="last-li create add-list create_new_list"><div>+ Create new shopping list</div></li>
+               </ul>
+             </div>
+        </template>
+
+        <template id="shopping_list_hover_button">
+          <div class="hover_button">
+            <div class="dropdown dropdown-button" >
+               <a href="/quickorder/shoppinglist" class="dropdown-hover">
+                 <div class="btn-group">
+                   <button type="button" class="btn btn-warning">Shopping List</button>
+                   <button type="button" class="btn btn-warning hover-single-fa"><i class="fa fa-chevron-down" ></i></button>
+                 </div>
+               </a>
+               <t t-call="website_sale_quickorder.shopping_cart" />
+             </div>
+          </div>
+        </template>
+
+        <template id="shopping_cart">
+          <ul class="dropdown-menu dropdown-hover custom-scroll-bar" style="max-height: 250px;" id="ul_append" >
+            <li t-if="not shopping_list" style="text-align:center;">
+              <label>Your Shopping List is empty</label>
+            </li>
+            <t t-foreach="shopping_list" t-as="user">
+              <li id="create_new_sp_list" t-att-value="user.id">
+                <div class="li-content">
+                  <label><t t-esc="user.name" /></label>
+                  <div class="row">
+                    <div><t t-esc="sum([x.quantity for x in user.quick_order_line])" /> items</div>
+                    <label  style="color:#428bca;">|</label>
+                    <div class="li-right"><t t-esc="sum([compute_currency(p._get_product_price()) for p in user.quick_order_line])" t-options="{'widget': 'monetary', 'display_currency': website.get_current_pricelist().currency_id, 'from_currency': website.currency_id}" /></div>
+                  </div>
+                  <div><a t-att-href="'/quickorder/shoppinglist/%s'%(user.id)" >View Details</a></div>
+                </div>
+              </li>
+            </t>
+          </ul>
+        </template>
+
+        <template id="shopping_list">
+          <t t-call="website.layout">
+            <div class="container container-text">
+             <div class="modal fade" id="myModal" role="dialog">
+               <div class="modal-dialog modal-sm">
+                 <div class="modal-content">
+                   <div class="modal-body">
+                       <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times"></i></button>
+                       <h4 class="modal-title">RENAME SHOPPING LIST</h4>
+                     <label style="margin-top:25px;"><strong>Enter the Shopping List name</strong></label>
+                     <input type="text" class="form-control e-sp-l-name" autofocus="true" placeholder="enter the shopping list name"/>
+                     <p style="color:red; display:none;">Shopping List name is not empty.</p>
+                     <div style="margin-top:20px;">
+                       <button type="button" class="btn btn-primary e-sp-up-name">Submit</button>
+                       <button type="button" class="btn btn-default" style="color:black; background-color:#ebebeb" data-dismiss="modal">Close</button>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+              <div style="padding-bottom: 50px;">
+                <div class="outer" style="padding-top: 10px;">
+                  <div class="row">
+                    <div class="col-md-9">
+                      <h2 style="margin-top: 15px;" >Quick Order</h2>
+                      <p class="text-body">Create &amp; save your own shopping list for quick checkout.</p>
+                    </div>
+                     <div class="col-md-3">
+                       <div class="sp-mn-button" style="padding-bottom: 10px;margin-top: 0px;">
+                         <t t-call="website_sale_quickorder.shopping_list_hover_button" />
+                       </div>
+                     </div>
+                  </div>
+                  <div class="panel-create alert-success" style="display:none;"></div>
+                  <div t-if="not shopping_lists"><t t-call="website_sale_quickorder.404" /></div>
+                </div>
+                <t t-foreach="shopping_lists" t-as="shopping">
+                   <div class="outer" t-att-id="shopping.id">
+                       <div class="inner">
+                         <div class="panel-shopping oe-get_shopping_list " t-att-ids="shopping.id" >
+                           <div class="row" id="check">
+                             <h4 class="col-4 col-md-3 col-xs-12 e-p-s-list-name inner_z_index mb-0" t-att-no="shopping.id"><t t-esc="shopping.name" />
+                               <span class="open-e-sp-name"><i class="fa fa-pencil-square-o"></i></span>
+                             </h4>
+                             <div class="col-3 col-md-2 col-xs-5 inner_z_index">
+                               <a class="fun fun-create_order" style="margin-top: 0px;font-weight: bold;color:#428bca;">Create Order</a>
+                             </div>
+                             <a class="col-3 offset-md-4 col-md-2 col-xs-5 link delete-list fun inner_z_index" style="font-weight: bold;">Delete List</a>
+                             <div t-if="len(shopping_lists) > 1" class="col-1 col-md-1 chevron-down"><i class="fa fa-chevron-down icon-round"></i></div>
+                             <div t-if="len(shopping_lists) > 1" class="col-1 col-md-1 chevron-up"><i class="fa fa-chevron-up icon-round"></i></div>
+                           </div>
+                         </div>
+                         <div t-if="len(shopping_lists) != 1" t-att-render="shopping.id" class="shopping-id"></div>
+                         <div t-if="len(shopping_lists) == 1"><t t-call="website_sale_quickorder.add_to_cart_mutliple" /></div>
+                       </div>
+                   </div>
+                 </t>
+               </div>
+            </div>
+          </t>
+        </template>
+
+        <template id="404">
+          <div class="panel-create alert-error">
+            <div class="" style="text-align:center;">
+              <br/><br/><br/>
+              <p><t t-esc="error['s_error']" /></p>
+            </div>
+          </div>
+         </template>
       </data>
 </odoo>

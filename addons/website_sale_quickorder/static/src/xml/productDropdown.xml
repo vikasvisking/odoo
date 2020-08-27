@@ -8,10 +8,10 @@
         <span class="dropdown-item-text text-muted">No results found. Please try another search.</span>
     </t>
     <div t-foreach="products" t-as="product" class="dropdown-item p-2 text-wrap">
-        <div class="media align-items-center o_search_product_item pro-item" t-attf-data-id="{{product.id}}" t-attf-data-src="/web/image/product.template/#{product['id']}/image_128" t-attf-data-name="{{product.name}}" t-attf-data-price="{{product.price}}">
+        <div class="media align-items-center o_search_product_item pro-item" t-attf-data-id="{{product.id}}" t-attf-data-src="/web/image/product.product/#{product['id']}/image_128" t-attf-data-name="{{product.name}}" t-attf-data-price="{{product.price}}">
             <t t-if="widget.displayImage">
               <a t-att-href="product['website_url']" >
-                <img t-attf-src="/web/image/product.template/#{product['id']}/image_128"
+                <img t-attf-src="/web/image/product.product/#{product['id']}/image_128"
                     class="flex-shrink-0 o_image_64_contain"/>
               </a>
             </t>

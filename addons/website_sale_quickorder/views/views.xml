@@ -1,60 +1,75 @@
 <odoo>
   <data>
-    <!-- explicit list view definition -->
-<!--
-    <record model="ir.ui.view" id="website_sale_quickorder.list">
-      <field name="name">website_sale_quickorder list</field>
-      <field name="model">website_sale_quickorder.website_sale_quickorder</field>
+    <record id="quick_order_tree_view" model="ir.ui.view">
+      <field name="name">quick_order tree view</field>
+      <field name="model">quick.order</field>
+      <field name="type">tree</field>
       <field name="arch" type="xml">
         <tree>
           <field name="name"/>
-          <field name="value"/>
-          <field name="value2"/>
+          <field name="user_id"/>
+          <field name="state" />
         </tree>
       </field>
     </record>
--->
 
-    <!-- actions opening views on models -->
-<!--
-    <record model="ir.actions.act_window" id="website_sale_quickorder.action_window">
-      <field name="name">website_sale_quickorder window</field>
-      <field name="res_model">website_sale_quickorder.website_sale_quickorder</field>
-      <field name="view_mode">tree,form</field>
-    </record>
--->
-
-    <!-- server action to the one above -->
-<!--
-    <record model="ir.actions.server" id="website_sale_quickorder.action_server">
-      <field name="name">website_sale_quickorder server</field>
-      <field name="model_id" ref="model_website_sale_quickorder_website_sale_quickorder"/>
-      <field name="state">code</field>
-      <field name="code">
-        action = {
-          "type": "ir.actions.act_window",
-          "view_mode": "tree,form",
-          "res_model": model._name,
-        }
+    <record id="quick_order_from_view" model="ir.ui.view">
+      <field name="name">quick_order form view</field>
+      <field name="model">quick.order</field>
+      <field name="type">form</field>
+      <field name="arch" type="xml">
+        <form>
+          <header>
+            <field name="state" widget="statusbar"/>
+          </header>
+          <sheet>
+            <group col="2">
+              <h1><field name="name" readonly="True"/></h1>
+            </group>
+            <group col="2">
+              <field name="user_id" attrs="{'readonly': [('state', '=', 'done')]}" required="1"/>
+            </group>
+            <group col="2">
+              <field name="quick_order_line" attrs="{'readonly': [('state', '=', 'done')]}">
+                <tree editable="bottom">
+                    <field name="product_id"/>
+                    <field name="quantity"/>
+                </tree>
+              </field>
+            </group>
+          </sheet>
+        </form>
       </field>
     </record>
--->
 
-    <!-- Top menu item -->
-<!--
-    <menuitem name="website_sale_quickorder" id="website_sale_quickorder.menu_root"/>
--->
-    <!-- menu categories -->
-<!--
-    <menuitem name="Menu 1" id="website_sale_quickorder.menu_1" parent="website_sale_quickorder.menu_root"/>
-    <menuitem name="Menu 2" id="website_sale_quickorder.menu_2" parent="website_sale_quickorder.menu_root"/>
--->
-    <!-- actions -->
-<!--
-    <menuitem name="List" id="website_sale_quickorder.menu_1_list" parent="website_sale_quickorder.menu_1"
-              action="website_sale_quickorder.action_window"/>
-    <menuitem name="Server to list" id="website_sale_quickorder" parent="website_sale_quickorder.menu_2"
-              action="website_sale_quickorder.action_server"/>
--->
+    <record id="quick_order_filter" model="ir.ui.view" >
+      <field name="name">quick.order.search</field>
+      <field name="model">quick.order</field>
+       <field name="arch" type="xml">
+        <search string="Search Order">
+          <filter name="Draft Order" string="Draft Order" domain="[('state','=','draft')]" />
+          <filter name="Done Order" string="Done Order" domain="[('state','=','done')]" />
+          <filter name="Shopping List" string="Shopping List" domain="[('state','=','shopping_list')]" />
+          <group string="Group By">
+            <filter name="Users Order" string="Users" domain="[]" context="{'group_by':'user_id'}" />
+          </group>
+        </search>
+      </field>
+    </record>
+
+    <record id="quick_order_action" model="ir.actions.act_window">
+      <field name="name">Quick Order</field>
+      <field name="res_model">quick.order</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_id" ref="quick_order_tree_view" />
+    </record>
+
+    <menuitem id="quick_order_sub_menu"
+          name="Quick Orders"
+          sequence="1"
+          parent="website_sale.menu_orders"
+          action="quick_order_action"
+          groups="base.group_no_one" />
   </data>
 </odoo>

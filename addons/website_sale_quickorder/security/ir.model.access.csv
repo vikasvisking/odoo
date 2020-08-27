@@ -1,2 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_website_sale_quickorder_website_sale_quickorder,website_sale_quickorder.website_sale_quickorder,model_website_sale_quickorder_website_sale_quickorder,base.group_user,1,1,1,1
+access_quick_order_portal,quick_order,model_quick_order,base.group_portal,1,1,1,1
+access_quick_order_user,quick_order,model_quick_order,base.group_user,1,1,1,1
+access_quick_order_message_portal,quick_order.message,model_quick_order_message,base.group_portal,1,1,1,1
+access_quick_order_message_user,quick_order.message,model_quick_order_message,base.group_user,1,1,1,1
+access_quick_order_line_user,quick_order.line,model_quick_order_line,base.group_user,1,1,1,1
+access_quick_order_line_portal,quick_order,model_quick_order_line,base.group_portal,1,1,1,1 
