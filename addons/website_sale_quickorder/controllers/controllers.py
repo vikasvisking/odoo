@@ -322,6 +322,7 @@ class WebsiteSaleQuickorder(http.Controller):
 
     @http.route(['/quickorder/shoppinglist', '/quickorder/shoppinglist/<int:shopping_id>'], auth='user', type='http', website=True)
     def shopping_list(self,shopping_id=0, id=0, **kw):
+        page = 'shoplist'
         shopping_lists = request.env['quick.order'].search([('user_id', '=', request._uid),('state', '=', 'shopping_list')])
         if id:
             shopping_list = request.env['quick.order'].search([('id', '=', int(id)),('state', '=', 'shopping_list'),('user_id', '=', request._uid)])
@@ -344,7 +345,8 @@ class WebsiteSaleQuickorder(http.Controller):
                         'shopping_lists' : shopping_list,
                         'shopping_list' : shopping_lists,
                         'error' :{'s_error': s_error.message_on_empty_shopping_list},
-                        'product_r': self.shopping_list_availability(shopping_list)
+                        'product_r': self.shopping_list_availability(shopping_list),
+                        'page': page
                     })
 
     ############################################################################
@@ -361,6 +363,23 @@ class WebsiteSaleQuickorder(http.Controller):
                     shopping_list.unlink()
                     if len(request.env['quick.order'].search([('user_id', '=', request._uid),('state', '=', 'shopping_list')])) <= 0:
                         s_error = request.env['quick.order.message'].search([], limit = 1)
-                        return request.env['ir.ui.view'].render_template('website_sale_quickorder.404',{'error' :{'s_error': s_error.message_on_empty_shopping_list}})
-                return json.dumps({'success' : "success"})
-        return json.dumps({'error' : "error"})
+        return request.redirect('/quickorder/shoppinglist')
+
+    @http.route(['/quickorder/shoppinglist/edit'], methods=['POST'], auth='user', type='http', website=True)
+    def shoping_list_edit(self, shop_id="", name=""):
+        if shop_id and name:
+            shop_list = request.env['quick.order'].browse(int(shop_id))
+            shop_list.write({
+            'name': name
+            })
+        return request.redirect('/quickorder/shoppinglist')
+
+    @http.route(['/quickorder/shopping-item'], auth='user', type='http', website=True)
+    def shoping_list_items(self, shop_id="", name=""):
+        shopitem = None
+        if shop_id:
+            shopitem = request.env['quick.order'].browse(int(shop_id))
+        dictV = {
+          'item': shopitem
+        }
+        return request.render('website_sale_quickorder.shoplist_item', dictV)

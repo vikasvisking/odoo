@@ -6,6 +6,20 @@ var core = require('web.core');
 var concurrency = require('web.concurrency');
 var qweb = core.qweb;
 
+publicWidget.registry.ShopListTable = publicWidget.Widget.extend({
+  selector: '#shoping-table',
+  events: {
+    'click .edit-shop': '_ShowEditModal'
+  },
+
+  _ShowEditModal: function (e) {
+    var id = $(e.target).closest('.edit-shop').data('id')
+    var name = $(e.target).closest('.edit-shop').data('name')
+    $('input[name="shop_id"]').val(id)
+    $('input[name="name"]').val(name)
+    $('.editModal').modal('show')
+  }
+});
 
 publicWidget.registry.AddListToQuickList = publicWidget.Widget.extend({
   selector: '.shoplist-btns',
