@@ -139,10 +139,16 @@ class WebsiteSaleQuickorder(http.Controller):
         if id:
             shoplist = request.env['quick.order'].browse(int(id))
             quickorder = request.env['quick.order'].search([('user_id', '=', request._uid),('state', '=', 'draft')], limit=1)
-            for line in shoplist.quick_order_line:
-                products_exists = self.variants_availability()
-                if line.product_id.id not in products_exists:
-                    quickorder.quick_order_line= [(0,0,{"product_id" : int(line.product_id.id)})]
+            if quickorder:
+                for line in shoplist.quick_order_line:
+                    products_exists = self.variants_availability()
+                    if line.product_id.id not in products_exists:
+                        quickorder.quick_order_line= [(0,0,{"product_id" : int(line.product_id.id)})]
+            else:
+                product_ids = [(0, 0, {"product_id": int(line.product_id.id)})for line in shoplist.quick_order_line]
+                quickorder = request.env['quick.order'].create({
+                 'quick_order_line': product_ids
+                })
         return request.redirect('/my/quick-order')
 
     @http.route(['/quickorder/addToList'], type = "json", auth = "user", website = True)
@@ -153,7 +159,7 @@ class WebsiteSaleQuickorder(http.Controller):
         status = False
         for line in quickorder.quick_order_line:
             if line.product_id.id not in product_list:
-                shoplist.quick_order_line= [(0,0,{"product_id" : int(line.product_id.id)})]
+                shoplist.quick_order_line = [(0,0,{"product_id" : int(line.product_id.id)})]
             quickorder.write({"quick_order_line":[(2, int(line.id))]})
             status = True
         return {'status': status}
@@ -219,7 +225,6 @@ class WebsiteSaleQuickorder(http.Controller):
                     })
                     products = user_exists.quick_order_line
                 user_exists = request.env['quick.order'].search([('user_id', '=', request._uid),('state', '=', 'draft')])
-                print(user_exists)
                 return {
                   'status': True,
                   'quickorder': user_exists.id
