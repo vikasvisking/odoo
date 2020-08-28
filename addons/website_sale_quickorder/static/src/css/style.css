@@ -23,11 +23,11 @@
 .btn-circle {
     width: 30px;
     height: 30px;
-    padding: 6px 0px;
-    border-radius: 15px;
-    text-align: center;
-    font-size: 12px;
-    line-height: 1.42857;
+    padding: 6px 0px !important;
+    border-radius: 15px !important;
+    text-align: 'center';
+    font-size: 12px !important;
+    line-height: 1.42857 !important;
 }
 
 .quickorder-qty .css_quantity input[name="add_qty"] {

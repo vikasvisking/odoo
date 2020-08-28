@@ -9,11 +9,8 @@
             <script type="text/javascript" src="/website_sale_quickorder/static/src/js/quickorder.js"></script>
             </xpath>
         </template>
+
         <template id="website_sale_quickorder.header" name="Website Sale QuickOrder"  inherit_id="portal.frontend_layout">
-          <!-- <xpath expr="." position="inside">
-		        <link rel="stylesheet" type="text/css" href="/website_sale_quickorder/static/src/css/style.css" />
-            <script type="text/javascript" src="/website_sale_quickorder/static/src/js/quickorder.js"></script>
-          </xpath> -->
           <xpath expr="//div[@id='top_menu_collapse']//ul//li[1]" position="before">
             <li class="nav-item">
               <a role="menuitem" href="/my/quick-order" class="nav-link ">
@@ -37,10 +34,9 @@
           </xpath>
         </template>
 
-        <template id="website_sale_quickorder.index" name="Quick order">
-          <t t-call="website_sale_quickorder.header">
+        <template id="website_sale_quickorder.index" name="Quick order" >
+          <t t-call="website.layout">
             <t t-set="additional_title">Quick Order</t>
-              <t t-call="website_sale_quickorder.quickorder_script"> </t>
             <div class="container">
               <div class="my-4">
                 <t t-call="website_sale_quickorder.portal_my_home_menu_sale" />
@@ -49,7 +45,7 @@
                 <h4> Quick order form</h4>
               </div>
 
-              <div class="col-md-12 my-3">
+              <div class="col-md-12 my-3 d-flex justify-content-between">
                 <div class="w3-dropdown-hover">
                    <button class="btn btn-secondary">Copy from Shopping List </button>
                    <div class="w3-dropdown-content w3-bar-block w3-border">
@@ -60,6 +56,9 @@
                      </t>
                    </div>
                  </div>
+                 <a href="/quickorder/shoppinglist">
+                  <button class="btn btn-primary"> Go To Shoping Lists </button>
+                 </a>
               </div>
 
               <t t-call="website_sale_quickorder.search" />
@@ -168,15 +167,6 @@
                         </div>
                       </div>
                     </div>
-                    <!-- <div t-if="not table_hreader_render" class="row" style="justify-content: flex-end;margin:0px;">
-                      <div t-if="not shopping_lists" class="mr-2">
-                        <t t-call="website_sale_quickorder.shopping_list_button" />
-                      </div>
-                      <div t-if="shopping_lists">
-                        <h1> Hello </h1>
-                      </div>
-                      <t t-call="website_sale_quickorder.add_to_shopping_list_model" />
-                    </div> -->
                   </div>
                 </div>
                 <div class="col-lg-4 sm-6 md-6 py-3 ">
