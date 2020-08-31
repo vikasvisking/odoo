@@ -1,7 +1,6 @@
 <odoo>
   <data>
     <!-- explicit list view definition -->
-
     <record model="ir.ui.view" id="luckins.list">
       <field name="name">General Category Window</field>
       <field name="model">luckins.luckins</field>
@@ -78,7 +77,36 @@
       <field name="view_mode">tree,form</field>
       <field name="view_id" ref="product_detail" />
     </record>
+</data>
 
+<data noupdate="1">
+    <record id="luckins_cron_product" model="ir.cron">
+        <field name="name">Get Luckins Product </field>
+        <field name="active" eval="True" />
+        <field name="user_id" ref="base.user_admin" />
+        <field name="interval_number">1</field>
+        <field name="interval_type">weeks</field>
+        <field name="numbercall">-1</field>
+        <field eval="False" name="doall"/>
+        <field name="model_id" eval="ref('model_luckins_product')" />
+        <field name="state">code</field>
+        <field name="code">model.getLuckinsProducts()</field>
+    </record>
+</data>
+
+<data noupdate="1">
+    <record id="luckins_cron_minor_brand_product" model="ir.cron">
+        <field name="name">Get Brand Categoru Product </field>
+        <field name="active" eval="True" />
+        <field name="user_id" ref="base.user_admin" />
+        <field name="interval_number">1</field>
+        <field name="interval_type">weeks</field>
+        <field name="numbercall">-1</field>
+        <field eval="False" name="doall"/>
+        <field name="model_id" eval="ref('model_luckins_product')" />
+        <field name="state">code</field>
+        <field name="code">model.getMinorProducts()</field>
+    </record>
 </data>
 
     <!-- server action to the one above -->
