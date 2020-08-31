@@ -85,10 +85,10 @@ class MajorCategories(models.Model):
             "Content-Type": "application/json",
             "Accept": "application/json",
         }
-        token = get_luckins_access_token()
 
         for cat in categories:
             sub_cat_list = []
+            token = get_luckins_access_token()
             payload = {
                 "Token":token,
                 "ViewportType":3,
@@ -132,7 +132,6 @@ class MinorCategories(models.Model):
         }
         for min_cat_ in major_category:
             access_token = get_luckins_access_token()
-
             payload = {
             	"Token":access_token,
             	"ViewportType":3,
