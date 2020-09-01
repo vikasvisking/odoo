@@ -509,6 +509,7 @@ class LuckinsProducts(models.Model):
     				}
                     product_request = requests.post(single_product_url, data = json.dumps(product_req_data), headers=headers)
                     product_data = product_request.json()
+                    time.sleep(5)
                     product_item = product_data["ItemDetailsList"][0]
                     try:
                         category = self.env['luckins.minor_category'].search([('luckins_id', '=', product_item.get('CommodityCodeMinor'))])
