@@ -371,6 +371,7 @@ class LuckinsProducts(models.Model):
                         }
                     product_request = requests.post(single_product_url, data = json.dumps(product_req_data), headers=headers)
                     product_data = product_request.json()
+                    time.sleep(5)
                     product_item = product_data.get('ItemDetailsList')[0]
                     product_id = product_item.get('TSIItemCode')
                     name = product_item.get('Product')
