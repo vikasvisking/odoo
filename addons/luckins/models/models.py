@@ -334,6 +334,7 @@ class LuckinsProducts(models.Model):
     certifications = fields.Char('Certifications')
     technical_data_sheet = fields.Char('Technical Data Sheet')
     installation_time = fields.Char('Installation Time')
+    odoo_id = fields.Integer('Odoo Id')
 
     def getLuckinsProducts(self):
         headers = {
@@ -371,7 +372,7 @@ class LuckinsProducts(models.Model):
                         }
                     product_request = requests.post(single_product_url, data = json.dumps(product_req_data), headers=headers)
                     product_data = product_request.json()
-                    time.sleep(5)
+                    sleep(5)
                     product_item = product_data.get('ItemDetailsList')[0]
                     product_id = product_item.get('TSIItemCode')
                     name = product_item.get('Product')
@@ -443,24 +444,23 @@ class LuckinsProducts(models.Model):
                     else:
                         products_obj.write(product_)
                     self.env.cr.commit()
-
                     if product_data.get('AttributeLabelList'):
                         self.env['luckins.productatrribute'].search([('product', '=', products_obj.id)]).unlink()
                         for attrb in product_data.get('AttributeLabelList'):
-                            attribute_label_list = filter(lambda label_data: label_data["AttributeClassID"] == attrb["ID"] , product_data["AttributeLabelList"])
+                            attribute_valu_dict = next((d for d in product_item.get('AttributeList') if d["AttributeLabelID"] == attrb["ID"]), None)
+                            attrib_list = list(filter(lambda x: x.get('AttributeLabelID') == attrb.get('ID'), product_item.get('AttributeList')))
                             attribute = self.env['luckins.productatrribute'].create({
                               'product': products_obj.id,
                               'name': attrb.get('Description')
                             })
-                            for value in attribute_label_list:
-                                attribute_valu_dict = next((d for d in product_data["ItemDetailsList"][0]["AttributeList"] if d["AttributeLabelID"] == value["ID"]), None)
+                            for value in attrib_list:
                                 self.env['luckins.productvalue'].create({
-                                  'product': products_obj,
-                                  'name': value['Description'],
-                                  'value': attribute_valu_dict.get('value'),
+                                  'product': products_obj.id,
+                                  'name': attribute.name,
+                                  'value': value.get('Value'),
                                   'attribute': attribute.id
                                 })
-                    self.env.cr.commit()
+                        self.env.cr.commit()
 
     def getMinorProducts(self):
         url = 'https://xtra.luckinslive.com/LuckinsLiveRESTHTTPS/ItemDetailsPicklist/1'
@@ -509,7 +509,7 @@ class LuckinsProducts(models.Model):
     				}
                     product_request = requests.post(single_product_url, data = json.dumps(product_req_data), headers=headers)
                     product_data = product_request.json()
-                    time.sleep(5)
+                    sleep(5)
                     product_item = product_data["ItemDetailsList"][0]
                     try:
                         category = self.env['luckins.minor_category'].search([('luckins_id', '=', product_item.get('CommodityCodeMinor'))])
@@ -581,21 +581,78 @@ class LuckinsProducts(models.Model):
                         products_obj = self.env['luckins.product'].create(product_)
                     else:
                         products_obj.write(product_)
+                    self.env.cr.commit()
 
                     if product_data.get('AttributeLabelList'):
                         self.env['luckins.productatrribute'].search([('product', '=', products_obj.id)]).unlink()
-                        for attribute_class in product_data.get('AttributeClassList'):
-                            attribute_label_list = filter(lambda label_data: label_data.get('AttributeClassID') == attribute_class.get('ID') , product_data.get('AttributeLabelList'))
-                            attribute_class_obj = self.env['luckins.productatrribute'].create({
-                                'product': products_obj.id,
-                                'name': attribute_class.get('Description')
+                        for attrb in product_data.get('AttributeLabelList'):
+                            attribute_valu_dict = next((d for d in product_item.get('AttributeList') if d["AttributeLabelID"] == attrb["ID"]), None)
+                            attrib_list = list(filter(lambda x: x.get('AttributeLabelID') == attrb.get('ID'), product_item.get('AttributeList')))
+                            attribute = self.env['luckins.productatrribute'].create({
+                              'product': products_obj.id,
+                              'name': attrb.get('Description')
                             })
-                            for attribute_label in attribute_label_list:
-                                attribute_valu_dict = next((d for d in product_item.get('AttributeList') if d.get('AttributeLabelID') == attribute_label.get('ID')), None)
+                            for value in attrib_list:
                                 self.env['luckins.productvalue'].create({
                                   'product': products_obj.id,
-                                  'name': attribute_label.get('Description'),
-                                  'value': attribute_valu_dict.get('value'),
-                                  'attribute': attribute_class_obj.id
+                                  'name': attribute.name,
+                                  'value': value.get('Value'),
+                                  'attribute': attribute.id
                                 })
-                    self.env.cr.commit()
+                        self.env.cr.commit()
+
+
+    def ImportProducts(self):
+        products = self.env['luckins.product'].search([('odoo_id', '=', None)])
+        for product in products:
+            product_template = self.env['product.template'].create({
+              'name': product.short_desc,
+              'type': 'consu',
+              'description_sale': product.other_desc,
+                'image_1920':product.large_thumbnail,
+                'image_1024':product.big_image,
+                'image_512':product.small_thumbnail,
+                'image_256':product.thumbnail,
+                'image_128':product.big_image,
+            })
+            attribute = self.env['luckins.productatrribute'].search([('product', '=', product.id)])
+            attrb_list = []
+            for attrb in attribute:
+                attribute_temp = self.env['product.attribute'].search([('name', '=', attrb.name)], limit=1)
+                if not attribute_temp:
+                    attribute_temp = self.env['product.attribute'].create({
+                      'name': attrb.name
+                    })
+                values = self.env['luckins.productvalue'].search([( 'attribute', '=', attrb.id )])
+                val_list = []
+                for val in values:
+                    valu = self.env['product.attribute.value'].search([('name', '=', val.value), ('attribute_id', '=', attribute_temp.id)])
+                    if not valu:
+                        valu = self.env['product.attribute.value'].create({
+                          'name': val.value,
+                          'attribute_id': attribute_temp.id
+                        })
+                    val_list.append(valu.id)
+                temp_attrb = self.env['product.template.attribute.line'].create({
+                  'attribute_id' : attribute_temp.id,
+                  'value_ids' : val_list,
+                  'product_tmpl_id' :product_template.id
+                })
+                attrb_list.append(temp_attrb.id)
+            product_template.write({
+                'attribute_line_ids': attrb_list
+            })
+            product_product = self.env['product.product'].search([('product_tmpl_id', '=', product_template.id)])
+            for prop in product_product:
+                prop.write({
+                  'default_code': product.product_id,
+                  'image_variant_1920': product.large_thumbnail,
+                  'image_variant_1024': product.big_image,
+                  'image_variant_128': product.small_thumbnail,
+                  'image_variant_512': product.thumbnail,
+                  'image_variant_256': product.big_image,
+                })
+                print(prop.image_variant_256)
+            product.write({
+              'odoo_id': product_template.id
+            })

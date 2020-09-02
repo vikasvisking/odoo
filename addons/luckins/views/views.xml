@@ -183,6 +183,16 @@
       </field>
     </record>
 
+    <record model="ir.actions.server" id="luckins.import_products">
+      <field name="name">Import Products</field>
+      <field name="type">ir.actions.server</field>
+      <field name="model_id" ref="model_luckins_product"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = model.ImportProducts()
+      </field>
+    </record>
+
     <!-- Top menu item -->
     <menuitem name="Luckins" id="luckins.menu_root"/>
 
@@ -211,7 +221,8 @@
     <menuitem name="View All Products" id="luckins_product" parent="luckins.menu_3" action="luckins.action_window8" sequence="300" />
     <menuitem name="Update All Products" id="luckins_product_update" parent="luckins.menu_3" action="luckins.get_products" sequence="400" />
     <menuitem name="Update Minor Brand Category Products" id="luckins_product_update2" parent="luckins.menu_3" action="luckins.get_minor_products" sequence="500" />
-    <!-- <menuitem name="Product Count" id="luckins.menu_5_list" parent="luckins.menu_2" action="luckins.action_window5" sequence="600"/> -->
+    <menuitem name="Import Products" id="luckins_product_import" parent="luckins.menu_3" action="luckins.import_products" sequence="500" />
 
+    <!-- <menuitem name="Product Count" id="luckins.menu_5_list" parent="luckins.menu_2" action="luckins.action_window5" sequence="600"/> -->
   </data>
 </odoo>
