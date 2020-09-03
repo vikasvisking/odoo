@@ -335,6 +335,8 @@ class LuckinsProducts(models.Model):
     technical_data_sheet = fields.Char('Technical Data Sheet')
     installation_time = fields.Char('Installation Time')
     odoo_id = fields.Integer('Odoo Id')
+    priceper = fields.Char('Per Price')
+    pricedes = fields.Char('Price Description')
 
     def getLuckinsProducts(self):
         headers = {
@@ -433,7 +435,8 @@ class LuckinsProducts(models.Model):
                     product_['certifications'] =  certifications
                     product_['technical_data_sheet'] =  technical_data_sheet
                     product_['user_manual'] =  user_manual
-
+                    product_['priceper'] = product.get('PickListItemPriceList')[0].get('PricePer')
+                    product_['pricedes'] = product.get('PickListItemPriceList')[0].get('PriceDescription')
 
                     if minor_cat:
                         product_['minor_cat'] = minor_cat.id
@@ -575,6 +578,8 @@ class LuckinsProducts(models.Model):
                     product_['technical_data_sheet'] =  technical_data_sheet
                     product_['user_manual'] =  user_manual
                     product_['minor_cat'] =  min.id
+                    product_['priceper'] = product.get('PickListItemPriceList')[0].get('PricePer')
+                    product_['pricedes'] = product.get('PickListItemPriceList')[0].get('PriceDescription')
 #
                     products_obj = self.env['luckins.product'].search([('product_id', '=', product_id), ('minor_cat', '=', min.id)])
                     if not products_obj:
@@ -614,6 +619,8 @@ class LuckinsProducts(models.Model):
                 'image_512':product.small_thumbnail,
                 'image_256':product.thumbnail,
                 'image_128':product.big_image,
+                'list_price': float(product.pricedes.replace('£', '')),
+                'lst_price': float(product.pricedes.replace('£', ''))
             })
             attribute = self.env['luckins.productatrribute'].search([('product', '=', product.id)])
             attrb_list = []
@@ -652,7 +659,6 @@ class LuckinsProducts(models.Model):
                   'image_variant_512': product.thumbnail,
                   'image_variant_256': product.big_image,
                 })
-                print(prop.image_variant_256)
             product.write({
               'odoo_id': product_template.id
             })
